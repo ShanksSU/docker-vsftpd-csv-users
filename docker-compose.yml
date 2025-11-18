@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  vsftpd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vsftpd
+    restart: always
+
+    # Expose FTP ports
+    ports:
+      - "20:20"
+      - "21:21"
+      - "21100-21110:21100-21110"
+
+    environment:
+      # Default FTP test account
+      FTP_USER: testuser
+      FTP_PASS: 123456
+
+      # Passive mode address
+      # Change to your host IP for remote clients
+      PASV_ADDRESS: 127.0.0.1
+      PASV_MIN_PORT: 21100
+      PASV_MAX_PORT: 21110
+
+      LOG_STDOUT: "YES"
+
+    volumes:
+      # FTP data directory (host <-> container)
+      - ./ftpdata:/home/vsftpd
+
+      # Mount user.csv for user creation
+      - ./user.csv:/opt/ftp_users/user.csv:ro
