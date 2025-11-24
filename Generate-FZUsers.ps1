@@ -93,6 +93,23 @@ foreach ($u in $csv) {
     $mount.SetAttribute("flags", "0")
     $user.AppendChild($mount)
 
+    # 建立 /public 共同資料夾
+    $PublicPath = Join-Path $BaseDir "public"
+    if (-not (Test-Path $PublicPath)) {
+        New-Item -ItemType Directory -Force -Path $PublicPath | Out-Null
+        Write-Host "已建立公共資料夾：$PublicPath"
+    }
+
+    # 掛載 shared 公共資料夾 (/public)
+    $mountPub = $xml.CreateElement("mount_point", "https://filezilla-project.org")
+    $mountPub.SetAttribute("tvfs_path", "/public")
+    $mountPub.SetAttribute("access", "1")
+    $mountPub.SetAttribute("native_path", "")
+    $mountPub.SetAttribute("new_native_path", $PublicPath)
+    $mountPub.SetAttribute("recursive", "2")
+    $mountPub.SetAttribute("flags", "0")
+    $user.AppendChild($mountPub)
+
     # rate limits
     $rate = $xml.CreateElement("rate_limits", "https://filezilla-project.org")
     $rate.SetAttribute("inbound", "unlimited")
@@ -142,3 +159,4 @@ $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 [System.IO.File]::WriteAllText("filezilla_users.xml", $xml.OuterXml, $utf8NoBom)
 
 Write-Host "`nfilezilla_users.xml 已生成，可直接匯入 FileZilla Server" -ForegroundColor Green
+
